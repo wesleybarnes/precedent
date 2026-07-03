@@ -1,0 +1,32 @@
+[
+  {
+    "query": "How likely is a prescription drug pricing bill to become law?",
+    "relevant": ["118-HR-410", "117-S-640", "117-HR-1205", "118-S-88"],
+    "note": "Healthcare / drug-pricing cluster."
+  },
+  {
+    "query": "What happened to past clean energy tax credit bills?",
+    "relevant": ["118-HR-700", "117-HR-455", "118-S-300"],
+    "note": "Environment / energy cluster."
+  },
+  {
+    "query": "Will a consumer data privacy bill pass?",
+    "relevant": ["118-HR-512", "118-S-410", "117-HR-888"],
+    "note": "Technology / privacy cluster."
+  },
+  {
+    "query": "How have skilled worker visa bills fared?",
+    "relevant": ["117-HR-330", "118-HR-150", "118-S-222"],
+    "note": "Immigration cluster."
+  },
+  {
+    "query": "Are small business tax relief bills likely to pass?",
+    "relevant": ["118-HR-22", "118-S-150", "117-HR-980"],
+    "note": "Taxation cluster."
+  },
+  {
+    "query": "What is the outlook for mental health coverage legislation?",
+    "relevant": ["117-HR-1205", "118-HR-410", "118-S-88"],
+    "note": "Healthcare cluster, phrased away from the bill titles."
+  }
+]

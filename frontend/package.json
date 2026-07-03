@@ -1,0 +1,21 @@
+{
+  "name": "precedent-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Developer visualizer for Precedent: watch GraphRAG and Vector RAG run side by side.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host --port 8081"
+  },
+  "dependencies": {
+    "d3-force": "^3.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.0"
+  }
+}

@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  neo4j:
+    image: neo4j:5.19-community
+    ports:
+      - "7474:7474"      # browser UI, visit localhost:7474
+      - "7687:7687"      # bolt protocol, what your Python code connects to
+    environment:
+      - NEO4J_AUTH=neo4j/devpassword
+    volumes:
+      - neo4j_data:/data
+
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    ports:
+      - "8080:8080"
+    environment:
+      # Use the real servers when running in the compose network.
+      - GRAPH_BACKEND=neo4j
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=devpassword
+      - CHROMA_MODE=server
+      - CHROMA_URL=http://chromadb:8000
+      # Passed through from your shell; unset means the extractive fallback runs.
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOVINFO_API_KEY=${GOVINFO_API_KEY:-}
+    depends_on:
+      - neo4j
+      - chromadb
+    volumes:
+      - ../src:/app/src        # live-reload your code without rebuilding the image
+      - ../data:/app/data      # seed dataset the API loads on startup
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.frontend
+    ports:
+      - "8081:8081"
+    depends_on:
+      - api
+
+volumes:
+  neo4j_data:
+  chroma_data:
