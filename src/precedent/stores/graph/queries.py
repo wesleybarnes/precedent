@@ -315,13 +315,21 @@ _MAX_HUB_FANOUT = 40
 def collect_metadata(store: GraphStore) -> dict[str, Any]:
     """Distinct subjects and congresses in the graph -- for the explorer filters."""
     subjects: set[str] = set()
-    congresses: set[str] = set()
+    congress_nums: set[int] = set()
     for bid in store.all_bill_ids():
         bill = store.get_bill(bid) or {}
         subjects.update(bill.get("subjects", []))
         if bill.get("congress"):
-            congresses.add(str(bill["congress"]))
-    return {"subjects": sorted(subjects), "congresses": sorted(congresses)}
+            congress_nums.add(int(bill["congress"]))
+
+    # Congress N spans Jan 3 of year (1788 + 2*N) to Jan 2 of year (1790 + 2*N)
+    congress_ranges = []
+    for c in sorted(congress_nums):
+        start_year = 1788 + 2 * c
+        end_year = start_year + 1
+        congress_ranges.append({"num": str(c), "span": f"{start_year}-{end_year}"})
+
+    return {"subjects": sorted(subjects), "congresses": congress_ranges}
 
 
 def build_bill_graph(

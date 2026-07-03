@@ -51,6 +51,22 @@ export default function GraphExplorer() {
     return () => { alive = false; };
   }, [subject, congress, minShared, limit]);
 
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const handler = (e) => {
+      e.preventDefault();
+      const rect = svgRef.current.getBoundingClientRect();
+      const sx = (e.clientX - rect.left) * (W / rect.width);
+      const sy = (e.clientY - rect.top) * (H / rect.height);
+      const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+      const k = Math.max(0.3, Math.min(4, view.k * factor));
+      setView({ k, x: sx - (sx - view.x) * (k / view.k), y: sy - (sy - view.y) * (k / view.k) });
+    };
+    svg.addEventListener("wheel", handler, { passive: false });
+    return () => svg.removeEventListener("wheel", handler);
+  }, [view]);
+
   // Lay the graph out once per data change with a static force pass.
   useEffect(() => {
     if (!data.nodes.length) { setPositions({}); return; }
@@ -92,15 +108,6 @@ export default function GraphExplorer() {
     const sy = (clientY - rect.top) * (H / rect.height);
     return { x: (sx - view.x) / view.k, y: (sy - view.y) / view.k };
   };
-  const onWheel = (e) => {
-    e.preventDefault();
-    const rect = svgRef.current.getBoundingClientRect();
-    const sx = (e.clientX - rect.left) * (W / rect.width);
-    const sy = (e.clientY - rect.top) * (H / rect.height);
-    const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-    const k = Math.max(0.3, Math.min(4, view.k * factor));
-    setView({ k, x: sx - (sx - view.x) * (k / view.k), y: sy - (sy - view.y) * (k / view.k) });
-  };
   const onPointerDown = (e, nodeId) => {
     e.target.setPointerCapture?.(e.pointerId);
     drag.current = { nodeId, moved: false, startX: e.clientX, startY: e.clientY };
@@ -121,7 +128,8 @@ export default function GraphExplorer() {
   };
   const onPointerUp = (e) => {
     if (drag.current && drag.current.nodeId && !drag.current.moved) {
-      setSelected((s) => (s === drag.current.nodeId ? null : drag.current.nodeId));
+      const nodeId = drag.current.nodeId;
+      setSelected((s) => (s === nodeId ? null : nodeId));
     }
     drag.current = null;
   };
@@ -160,10 +168,10 @@ export default function GraphExplorer() {
             {meta.subjects.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </Filter>
-        <Filter label="Congress" help="Each Congress lasts two years (the 118th ran 2023–2025). Filter to one.">
+        <Filter label="Congress" help="Each Congress lasts two years. Filter to one or see all.">
           <select value={congress} onChange={(e) => setCongress(e.target.value)}>
             <option value="">all</option>
-            {meta.congresses.map((c) => <option key={c} value={c}>{c}th</option>)}
+            {meta.congresses.map((c) => <option key={c.num} value={c.num}>{c.num}th Congress ({c.span})</option>)}
           </select>
         </Filter>
         <Filter label={`Min shared: ${minShared}`}
@@ -184,7 +192,6 @@ export default function GraphExplorer() {
       <div className="explorer-stage">
         <svg
           ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="explorer-svg"
-          onWheel={onWheel}
           onPointerDown={(e) => { if (e.target === e.currentTarget || e.target.tagName === "rect") onPointerDown(e, null); }}
           onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp}
         >
