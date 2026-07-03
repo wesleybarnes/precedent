@@ -1,0 +1,20 @@
+# Build the Vite app, then serve the static bundle with `vite preview`.
+# Two stages so the runtime image doesn't carry the full node_modules build tree.
+FROM node:20-slim AS build
+WORKDIR /app
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm install --no-audit --no-fund
+COPY frontend/ ./
+# In the container the frontend calls the API through the compose network. The
+# api service is reachable at http://api:8080, but the browser can't resolve
+# that name -- so point the built app at the host-published API port instead.
+ENV VITE_API_BASE=http://localhost:8080
+RUN npm run build
+
+FROM node:20-slim
+WORKDIR /app
+RUN npm install -g vite@5
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package.json ./package.json
+EXPOSE 8081
+CMD ["vite", "preview", "--host", "--port", "8081", "--outDir", "dist"]

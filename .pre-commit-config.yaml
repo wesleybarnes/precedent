@@ -1,0 +1,22 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+        args: [--fix]          # auto-fixes what it can (unused imports, etc.)
+      - id: ruff-format         # formats code, replaces black
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [pydantic, types-requests]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml          # catches broken YAML before it breaks your CI workflows
+      - id: check-added-large-files   # blocks accidentally committing huge files (datasets!)
+      - id: detect-private-key        # blocks committing keys/secrets
